@@ -1,4 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
+from flask import jsonify
+from pymongo import MongoClient
 from flask_pymongo import PyMongo
 from bson.objectid import ObjectId
 from dotenv import load_dotenv
@@ -62,4 +64,21 @@ def delete_student(student_id):
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True, port=5000)
 
+
+@app.route('/health')
+def health():
+    try:
+        client = MongoClient(MONGO_URI)
+        client.admin.command('ping')
+
+        return jsonify({
+            "status": "UP",
+            "mongodb": "Connected"
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "status": "DOWN",
+            "error": str(e)
+        }), 500
 
